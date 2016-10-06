@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Font Data</title>
+    <script src="../lib/bower_components/requirejs/require.js"></script>
+    <script>
+    fontFiles = [
+        '../assets/fonts/VT323-Regular.ttf'
+      , '../assets/fonts/MontserratAlternates-Bold.ttf'
+      , '../assets/fonts/Pacifico-Regular.ttf'
+    ];
+
+    require.config({baseUrl: '../lib'});
+    require(['bootstrap'], function(require) {
+        require(['fontData/main'], function(main) {
+            main(document, fontFiles);
+        });
+    });
+    </script>
+</head>
+<body>
+    <h1>GlyphTable</h1>
+</body>
+</html>
