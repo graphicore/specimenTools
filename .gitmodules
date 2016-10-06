@@ -1,0 +1,3 @@
+[submodule "build/cldr-misc-modern"]
+	path = build/cldr-misc-modern
+	url = git@github.com:unicode-cldr/cldr-misc-modern.git
