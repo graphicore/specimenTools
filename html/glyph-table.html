@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Glyph Table</title>
+    <script src="../lib/bower_components/requirejs/require.js"></script>
+    <script>
+    fontFiles = [
+        '../assets/fonts/VT323-Regular.ttf'
+      , '../assets/fonts/MontserratAlternates-Bold.ttf'
+      , '../assets/fonts/MontserratAlternates-ExtraBold.ttf'
+      , '../assets/fonts/MontserratAlternates-ExtraLight.ttf'
+    ];
+
+    require.config({baseUrl: '../lib'});
+    require(['bootstrap'], function(require) {
+        require(['glyphTable/main'], function(main) {
+            main(document, fontFiles);
+        });
+    });
+    </script>
+    <style>
+        .glyph {
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        .glyph:nth-child(2n) svg {
+            background: lightpink;
+        }
+        .glyph:nth-child(2n) svg path{
+            fill:red
+        }
+        .glyph svg {
+            width: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* default-widest 20 items */
+        .glyph {
+            width: calc(100% / 20);
+        }
+        @media (max-width: 1000px) {
+            .glyph {
+                width: calc(100% / 16);
+            }
+        }
+        @media (max-width: 700px) {
+            .glyph {
+                width: calc(100% / 12);
+            }
+        }
+        @media (max-width: 600px) {
+            .glyph {
+                width: calc(100% / 10);
+            }
+        }
+        @media (max-width: 500px) {
+            .glyph {
+                width: calc(100% / 8);
+            }
+        }
+        @media (max-width: 400px) {
+            .glyph {
+                width: calc(100% / 6);
+            }
+        }
+        @media (max-width: 300px) {
+            .glyph {
+                width: calc(100% / 4);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>GlyphTable</h1>
+</body>
+</html>
