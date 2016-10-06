@@ -1,0 +1,25 @@
+{
+  "name": "specimenTools",
+  "version": "0.0.0",
+  "authors": [
+    "Lasse Fister <commander@graphicore.de>"
+  ],
+  "moduleType": [
+    "amd"
+  ],
+  "license": "APACHE2",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "lib/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Atem-Pen-Case": "graphicore/Atem-Pen-Case",
+    "opentype.js": "~0.6.5",
+    "requirejs": "~2.3.2"
+  }
+}
