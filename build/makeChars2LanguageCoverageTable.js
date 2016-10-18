@@ -89,7 +89,6 @@ function getCharacters(languageDir){
 }
 
 function main() {
-    console.log('cldrMiscPath', cldrMiscPath);
     //if (arguments.length === 0) {
     //    console.log('Usage: $' , path.basename(__filename));
     //    console.warn('Missing Arguments:')
