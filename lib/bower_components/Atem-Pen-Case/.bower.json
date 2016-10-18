@@ -1,0 +1,44 @@
+{
+  "name": "Atem-Pen-Case",
+  "homepage": "https://github.com/graphicore/Atem-Pen-Case",
+  "authors": [
+    "Lasse Fister <commander@graphicore.de>"
+  ],
+  "main": "JavaScript implementation of the Segment-Pen and Point-Pen-Protocol (API) plus a collection of pens.",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "pen",
+    "protocol",
+    "ufo",
+    "fonttools",
+    "robofab",
+    "Atem",
+    "SegmentPen",
+    "PointPen"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "lib/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Atem-Errors": "graphicore/Atem-Errors",
+    "Atem-Math-Tools": "graphicore/Atem-Math-Tools"
+  },
+  "_release": "456b7b8294",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "456b7b82941cdd362128a3081a30bddb054fe055"
+  },
+  "_source": "git://github.com/graphicore/Atem-Pen-Case.git",
+  "_target": "*",
+  "_originalSource": "graphicore/Atem-Pen-Case",
+  "_direct": true
+}
