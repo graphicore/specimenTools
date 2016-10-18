@@ -21,6 +21,7 @@
     "Atem-Pen-Case": "graphicore/Atem-Pen-Case",
     "opentype.js": "~0.6.5",
     "requirejs": "~2.3.2",
-    "marked": "~0.3.6"
+    "marked": "~0.3.6",
+    "requirejs-text": "~2.0.15"
   }
 }
