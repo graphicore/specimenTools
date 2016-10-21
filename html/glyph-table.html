@@ -17,6 +17,15 @@
       , '../assets/fonts/Quicksand-Regular.ttf'
       , '../assets/fonts/Pacifico-Regular.ttf'
       , '../assets/fonts/VT323-Regular.ttf'
+      , '../assets/fonts/JosefinSans-ThinItalic.ttf'
+      , '../assets/fonts/JosefinSans-Thin.ttf'
+      , '../assets/fonts/JosefinSans-SemiBoldItalic.ttf'
+      , '../assets/fonts/JosefinSans-Regular.ttf'
+      , '../assets/fonts/JosefinSans-LightItalic.ttf'
+      , '../assets/fonts/JosefinSans-Light.ttf'
+      , '../assets/fonts/JosefinSans-Italic.ttf'
+      , '../assets/fonts/JosefinSans-BoldItalic.ttf'
+      , '../assets/fonts/JosefinSans-Bold.ttf'
     ];
 
     require.config({baseUrl: '../lib'});
@@ -79,6 +88,23 @@
                 width: calc(100% / 4);
             }
         }
+
+        button.active {
+            background: lightgreen;
+        }
+
+        button.checked {
+            background: lightgreen;
+
+        }
+        button.italic-switch.checked:after{
+            content: ' ☑'
+        }
+
+        button.italic-switch:after {
+            content: ' ☐'
+        }
+
 
     </style>
 </head>
