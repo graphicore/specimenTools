@@ -31,7 +31,7 @@
     require.config({baseUrl: '../lib'});
     require(['bootstrap'], function(require) {
         require(['fontData/main'], function(main) {
-            main(document, fontFiles);
+            main(window, fontFiles);
         });
     });
     </script>
