@@ -1,0 +1,230 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Glyph Table</title>
+    <script src="../../../lib/bower_components/requirejs/require.js"></script>
+    <script>
+    fontFiles = [[
+        '../../assets/fonts/MontserratAlternates-Bold.ttf'
+      , '../../assets/fonts/MontserratAlternates-ExtraBold.ttf'
+      , '../../assets/fonts/MontserratAlternates-ExtraLight.ttf'
+      , '../../assets/fonts/Montserrat-Thin.ttf'
+    ],
+    [
+        '../../assets/fonts/Pacifico-Regular.ttf'
+      , '../../assets/fonts/Jura-Medium.ttf'
+      , '../../assets/fonts/Quicksand-Bold.ttf'
+      , '../../assets/fonts/Quicksand-Light.ttf'
+      , '../../assets/fonts/Quicksand-Medium.ttf'
+      , '../../assets/fonts/Quicksand-Regular.ttf'
+      , '../../assets/fonts/JosefinSans-ThinItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Thin.ttf'
+      , '../../assets/fonts/JosefinSans-SemiBoldItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Regular.ttf'
+      , '../../assets/fonts/JosefinSans-LightItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Light.ttf'
+      , '../../assets/fonts/JosefinSans-Italic.ttf'
+      , '../../assets/fonts/JosefinSans-BoldItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Bold.ttf'
+    ],
+    [
+        '../../assets/fonts/VT323-Regular.ttf'
+    ]];
+    require.config({baseUrl: '../../lib'});
+    require(['bootstrap'], function(require) {
+        require(['../html/example_multiple/example_multiple_main'], function(main) {
+            main(window, fontFiles);
+        });
+    });
+    </script>
+    <style>
+        .glyph {
+            box-sizing: border-box;
+            display: inline-block;
+        }
+
+        .glyph:nth-child(2n) svg {
+            background: lightpink;
+        }
+        .glyph:nth-child(2n) svg path{
+            fill:red
+        }
+
+        .glyph svg {
+            width: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* default-widest 20 items */
+        .glyph {
+            width: calc(100% / 20);
+        }
+        @media (max-width: 1000px) {
+            .glyph {
+                width: calc(100% / 16);
+            }
+        }
+        @media (max-width: 700px) {
+            .glyph {
+                width: calc(100% / 12);
+            }
+        }
+        @media (max-width: 600px) {
+            .glyph {
+                width: calc(100% / 10);
+            }
+        }
+        @media (max-width: 500px) {
+            .glyph {
+                width: calc(100% / 8);
+            }
+        }
+        @media (max-width: 400px) {
+            .glyph {
+                width: calc(100% / 6);
+            }
+        }
+        @media (max-width: 300px) {
+            .glyph {
+                width: calc(100% / 4);
+            }
+        }
+
+        button.active {
+            background: lightgreen;
+        }
+
+        button.checked {
+            background: lightgreen;
+
+        }
+        button.italic-switch.checked:after{
+            content: ' ☑'
+        }
+
+        button.italic-switch:after {
+            content: ' ☐'
+        }
+
+
+    </style>
+</head>
+<body>
+    <h1>Font SpecimenTools Example</h1>
+    <p><em>We only show the very basics here, go to
+        <a href="https://github.com/graphicore/mdlFontSpecimen">mdlFontSpecimen</a>
+        to see how these SpecimenTools should be used.</em></p>
+
+    
+    
+    <div class="wrapper">
+        <h1>Specimen 1</h1>
+        <h4>Size of Glyph-Set
+            <span class="font-data"
+                  data-getter="NumberGlyphs"></span>
+        </h4>
+        <h4>Supported Languages
+            <span class="font-data"
+                  data-getter="NumberSupportedLanguages"></span>
+        </h4>
+        <div>
+            <h4>All Supported Languages</h4>
+            <p class="font-data"
+               data-getter="SupportedLanguages"></p>
+        </div>
+        <div>
+            <h2>Choose a Font</h2>
+            <div class="family-chooser"></div>
+        </div> 
+        <div class="type-tester">
+            <h2 class="mdl-card__title-text">Test the Font</h2>
+            <h5>Default Features</h5>
+            <div class="type-tester__features--default"></div>
+            <h5>Optional Features</h5>
+            <div class="type-tester__features--optional"></div>
+            <h5>Font size: <span class="type-tester__font-size-indicator"></span></h5>
+            <div class="type-tester__font-size"></div>
+            <p class="current-font type-tester__content" contenteditable="true">
+            TYPE HERE …
+            </p>
+            <small><a href="https://en.wikipedia.org/wiki/Web_typography">Source: Wikipedia</a></small>
+        </div>
+        <div class="glyph-table"></div>
+    </div>
+
+    <div class="wrapper">
+        <h1>Specimen 2</h1>
+        <h4>Size of Glyph-Set
+            <span class="font-data"
+                  data-getter="NumberGlyphs"></span>
+        </h4>
+        <h4>Supported Languages
+            <span class="font-data"
+                  data-getter="NumberSupportedLanguages"></span>
+        </h4>
+        <div>
+            <h4>All Supported Languages</h4>
+            <p class="font-data"
+               data-getter="SupportedLanguages"></p>
+        </div>
+        <div>
+            <h2>Choose a Font</h2>
+            <div class="family-chooser"></div>
+        </div>
+        <div class="type-tester">
+            <h2 class="mdl-card__title-text">Test the Font</h2>
+            <h5>Default Features</h5>
+            <div class="type-tester__features--default"></div>
+            <h5>Optional Features</h5>
+            <div class="type-tester__features--optional"></div>
+            <h5>Font size: <span class="type-tester__font-size-indicator"></span></h5>
+            <div class="type-tester__font-size"></div>
+            <p class="current-font type-tester__content" contenteditable="true">
+            TYPE HERE …
+            </p>
+            <small><a href="https://en.wikipedia.org/wiki/Web_typography">Source: Wikipedia</a></small>
+        </div>
+        <div class="glyph-table"></div>
+    </div>
+
+    <div class="wrapper">
+        <h1>Specimen 3</h1>
+        <h4>Size of Glyph-Set
+            <span class="font-data"
+                  data-getter="NumberGlyphs"></span>
+        </h4>
+        <h4>Supported Languages
+            <span class="font-data"
+                  data-getter="NumberSupportedLanguages"></span>
+        </h4>
+        <div>
+            <h4>All Supported Languages</h4>
+            <p class="font-data"
+               data-getter="SupportedLanguages"></p>
+        </div>   
+        <div>
+            <h2>Choose a Font</h2>
+            <div class="family-chooser"></div>
+        </div>
+        <div class="type-tester">
+            <h2 class="mdl-card__title-text">Test the Font</h2>
+            <h5>Default Features</h5>
+            <div class="type-tester__features--default"></div>
+            <h5>Optional Features</h5>
+            <div class="type-tester__features--optional"></div>
+            <h5>Font size: <span class="type-tester__font-size-indicator"></span></h5>
+            <div class="type-tester__font-size"></div>
+            <p class="current-font type-tester__content" contenteditable="true">
+            TYPE HERE …
+            </p>
+            <small><a href="https://en.wikipedia.org/wiki/Web_typography">Source: Wikipedia</a></small>
+        </div>
+        <div class="glyph-table"></div>
+    </div>
+
+</div>
+
+</body>
+</html>
