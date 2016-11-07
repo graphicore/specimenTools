@@ -6,7 +6,7 @@ Currently the main usage is in [mdlFontSpecimen](https://github.com/graphicore/m
 
 However, the main documentation of the available widgets can be found here.
 
-There is a minimal [example](html/example.html). You can run it like this:
+There is a minimal [example](examples/simple/index.html). You can run it like this:
 
 ```
 ~$ git clone git@github.com:graphicore/specimenTools.git
@@ -14,7 +14,7 @@ There is a minimal [example](html/example.html). You can run it like this:
 ~/specimenTools$ bower install
 # now start a http-server to serve from ~/specimenTools
 # e.g. python3 -m http.server 8000
-# visit: http://localhost:8000/html/example.html
+# visit: http://localhost:8000/examples/simple/index.html
 ```
 
 The [widgets](lib/widgets) have some documentation in their js files.
@@ -23,7 +23,7 @@ The [widgets](lib/widgets) have some documentation in their js files.
 
 ## Bootstrapping, Signals and Life Cycle
 
-Have a look at [the minimal example_main.js](lib/example_main.js).
+Have a look at [the minimal examples/simple/main.js](examples/simple/main.js).
 
 All signaling is done via a single central instance of the [PubSub module](lib/services/PubSub.js).
 

@@ -3,33 +3,33 @@
 <head>
     <meta charset="utf-8" />
     <title>Glyph Table</title>
-    <script src="../lib/bower_components/requirejs/require.js"></script>
+    <script src="../../../lib/bower_components/requirejs/require.js"></script>
     <script>
     fontFiles = [
-        '../assets/fonts/Jura-Medium.ttf'
-      , '../assets/fonts/MontserratAlternates-Bold.ttf'
-      , '../assets/fonts/MontserratAlternates-ExtraBold.ttf'
-      , '../assets/fonts/MontserratAlternates-ExtraLight.ttf'
-      , '../assets/fonts/Montserrat-Thin.ttf'
-      , '../assets/fonts/Quicksand-Bold.ttf'
-      , '../assets/fonts/Quicksand-Light.ttf'
-      , '../assets/fonts/Quicksand-Medium.ttf'
-      , '../assets/fonts/Quicksand-Regular.ttf'
-      , '../assets/fonts/Pacifico-Regular.ttf'
-      , '../assets/fonts/VT323-Regular.ttf'
-      , '../assets/fonts/JosefinSans-ThinItalic.ttf'
-      , '../assets/fonts/JosefinSans-Thin.ttf'
-      , '../assets/fonts/JosefinSans-SemiBoldItalic.ttf'
-      , '../assets/fonts/JosefinSans-Regular.ttf'
-      , '../assets/fonts/JosefinSans-LightItalic.ttf'
-      , '../assets/fonts/JosefinSans-Light.ttf'
-      , '../assets/fonts/JosefinSans-Italic.ttf'
-      , '../assets/fonts/JosefinSans-BoldItalic.ttf'
-      , '../assets/fonts/JosefinSans-Bold.ttf'
+        '../../assets/fonts/Jura-Medium.ttf'
+      , '../../assets/fonts/MontserratAlternates-Bold.ttf'
+      , '../../assets/fonts/MontserratAlternates-ExtraBold.ttf'
+      , '../../assets/fonts/MontserratAlternates-ExtraLight.ttf'
+      , '../../assets/fonts/Montserrat-Thin.ttf'
+      , '../../assets/fonts/Quicksand-Bold.ttf'
+      , '../../assets/fonts/Quicksand-Light.ttf'
+      , '../../assets/fonts/Quicksand-Medium.ttf'
+      , '../../assets/fonts/Quicksand-Regular.ttf'
+      , '../../assets/fonts/Pacifico-Regular.ttf'
+      , '../../assets/fonts/VT323-Regular.ttf'
+      , '../../assets/fonts/JosefinSans-ThinItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Thin.ttf'
+      , '../../assets/fonts/JosefinSans-SemiBoldItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Regular.ttf'
+      , '../../assets/fonts/JosefinSans-LightItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Light.ttf'
+      , '../../assets/fonts/JosefinSans-Italic.ttf'
+      , '../../assets/fonts/JosefinSans-BoldItalic.ttf'
+      , '../../assets/fonts/JosefinSans-Bold.ttf'
     ];
-    require.config({baseUrl: '../lib'});
+    require.config({baseUrl: '../../lib'});
     require(['bootstrap'], function(require) {
-        require(['example_main'], function(main) {
+        require(['../examples/simple/main'], function(main) {
             main(window, fontFiles);
         });
     });
