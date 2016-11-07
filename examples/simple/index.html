@@ -138,8 +138,33 @@
     <div class="type-tester__features--default"></div>
     <h5>Optional Features</h5>
     <div class="type-tester__features--optional"></div>
-    <h5>Font size: <span class="type-tester__font-size-indicator"></span></h5>
-    <div class="type-tester__font-size"></div>
+    
+    <h5>Font size: <span class="type-tester__label" data-target-property="font-size"></span></h5>    
+    <div class="type-tester__slider"
+    data-target-property="font-size"
+    data-unit="px"
+    data-min="5"
+    data-max="128"
+    data-step="1"></div>
+    
+    <h5>Letter spacing: <span class="type-tester__label" data-target-property="letter-spacing"></span></h5>
+    <div class="type-tester__slider"
+    data-target-property="letter-spacing"
+    data-unit="px"
+    data-min="-5"
+    data-max="5"
+    data-step="1"
+    data-value="0"></div>
+    
+    <h5>Line height: <span class="type-tester__label" data-target-property="line-height"></span></h5>
+    <div class="type-tester__slider"
+    data-target-property="line-height"
+    data-unit="%"
+    data-min="50"
+    data-max="300"
+    data-value="100"
+    data-step="5"></div>
+
     <p class="current-font type-tester__content" contenteditable="true">
     TYPE HERE …<br />
     Web typography refers to the use of fonts on the World Wide Web. When
@@ -155,7 +180,7 @@
     <small><a href="https://en.wikipedia.org/wiki/Web_typography">Source: Wikipedia</a></small>
   </div>
 
-  <div class="glyph-table"></div>
+  <!-- <div class="glyph-table"></div> -->
 </div>
 
 </body>
