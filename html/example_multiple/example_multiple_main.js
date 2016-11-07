@@ -60,10 +60,10 @@ define([
           initDocumentWidgets(wrappers[i], factories, pubsub);
 
           pubsub.subscribe('allFontsLoaded', function () {
-              pubsub.publish('activateFont', 0);
-          });
+              this.publish('activateFont', 0);
+          }.bind(pubsub));
 
-          loadFonts.fromUrl(pubsub, fontFilesForInstance); 
+          loadFonts.fromUrl(pubsub, fontFilesForInstance);
         }
     }
 
