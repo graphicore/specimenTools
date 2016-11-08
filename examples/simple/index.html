@@ -132,38 +132,38 @@
         <div class="family-chooser"></div>
     </div>
 
-  <div class="type-tester">
+  <div class="type-tester"
+       data-unit-font-size="px"
+       data-min-font-size="5"
+       data-max-font-size="128"
+       data-step-font-size="1"
+       data-value-font-size="18"
+       data-unit-letter-spacing="px"
+       data-min-letter-spacing="-5"
+       data-max-letter-spacing="5"
+       data-value-letter-spacing="0"
+       data-step-letter-spacing="0.1"
+       data-unit-line-height="%"
+       data-min-line-height="50"
+       data-max-line-height="300"
+       data-step-line-height="5"
+       data-value-line-height="100">
+
     <h2 class="mdl-card__title-text">Test the Font</h2>
     <h5>Default Features</h5>
     <div class="type-tester__features--default"></div>
     <h5>Optional Features</h5>
     <div class="type-tester__features--optional"></div>
     
-    <h5>Font size: <span class="type-tester__label" data-target-property="font-size"></span></h5>    
-    <div class="type-tester__slider"
-    data-target-property="font-size"
-    data-unit="px"
-    data-min="5"
-    data-max="128"
-    data-step="1"></div>
-    
+    <h5>Font size: <span class="type-tester__label" data-target-property="font-size"></span></h5>
+    <div class="type-tester__slider" data-target-property="font-size"></div>
+
     <h5>Letter spacing: <span class="type-tester__label" data-target-property="letter-spacing"></span></h5>
-    <div class="type-tester__slider"
-    data-target-property="letter-spacing"
-    data-unit="px"
-    data-min="-5"
-    data-max="5"
-    data-step="1"
-    data-value="0"></div>
-    
+    <div class="type-tester__slider" data-target-property="letter-spacing"></div>
+
     <h5>Line height: <span class="type-tester__label" data-target-property="line-height"></span></h5>
-    <div class="type-tester__slider"
-    data-target-property="line-height"
-    data-unit="%"
-    data-min="50"
-    data-max="300"
-    data-value="100"
-    data-step="5"></div>
+    <div class="type-tester__slider" data-target-property="line-height"></div>
+
 
     <p class="current-font type-tester__content" contenteditable="true">
     TYPE HERE …<br />
@@ -178,9 +178,12 @@
     was published in 1996 and provided the same capabilities.
     </p>
     <small><a href="https://en.wikipedia.org/wiki/Web_typography">Source: Wikipedia</a></small>
+
+    <h5>Line height: <span class="type-tester__label" data-target-property="line-height"></span></h5>
+    <div class="type-tester__slider" data-target-property="line-height"></div>
   </div>
 
-  <!-- <div class="glyph-table"></div> -->
+   <div class="glyph-table"></div>
 </div>
 
 </body>
