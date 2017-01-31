@@ -4,3 +4,6 @@
 [submodule "build/cldr-localenames-modern"]
 	path = build/cldr-localenames-modern
 	url = git@github.com:unicode-cldr/cldr-localenames-modern.git
+[submodule "build/googleFontsTools"]
+	path = build/googleFontsTools
+	url = git@github.com:graphicore/googleFontsTools.git
