@@ -20,6 +20,10 @@ requirejs.config({
 requirejs.config(requirejs('setup'));
 var FontsData = requirejs('specimenTools/services/FontsData');
 
+var languageCharSetsJson =  requirejs('!require/text!../build/languageCharSets_with_locales.json')
+  , languageCharSets = JSON.parse(languageCharSetsJson)
+  ;
+
 function getLangData(languageCharset, googleCharsets, alphabetKey){
     var result = {
             charsetNames: null
@@ -98,18 +102,21 @@ function parseNamHeader(lines) {
             lines: lines
           , includes: []
         }
-      , i, l, line, tokens
+      , i, l, line, keyword, args
       ;
     for(i=0,l=lines.length;i<l;i++) {
         line = lines[i];
         if( line.slice(0,2) !== '#$' )
             // non functional line
             continue;
-        tokens = line.slice(2).split(' ').filter(token => token.length);
-        switch(tokens[0]) {
+        line = line.slice(2).trimLeft();
+        keyword = line.split(' ', 1)[0];
+        args = line.slice(keyword.length);
+        switch(keyword) {
             case 'include':
-                if(tokens[1])
-                    result.includes.push(tokens[1]);
+                args = args.trim();
+                if(args)
+                    result.includes.push(args);
                 break;
             // default:
         }
@@ -133,8 +140,8 @@ function parseNam(str, returnCodePoints) {
     var result = []
       , lines = str.split('\n')
       , i, l, line
-      , unicode
-      , uniReg=/^[A-F0-9]{4}$/
+      , test, match, unicode
+      , uniReg=/^[A-F0-9]{4,5}/
       , extractingHeader = true
       , headerLines = []
       ;
@@ -153,16 +160,22 @@ function parseNam(str, returnCodePoints) {
         }
         if(line.slice(0,2) !== '0x')
             continue;
-        unicode = line.slice(2,6);
-        if(!uniReg.test(unicode))
+
+        test = line.slice(2,7);
+        match = uniReg.exec(test);
+        if(match === null) {
+            if ((match = uniReg.exec(test.toUpperCase())) !== null)
+                console.warn('Found lowercase codepoint, but must be uppercase: ' + line.slice(0,6));
             continue;
+        }
+        unicode = match[0];
         result.push([
                 // unicode char
                 returnCodePoints
                     ? parseInt(unicode, 16)
                     : String.fromCodePoint(parseInt(unicode, 16))
                 // arbitrary description
-              , line.slice(6)
+              , line.slice(2+unicode.length)
         ]);
     }
     result.header = parseNamHeader(headerLines);
@@ -256,6 +269,28 @@ function printCoverage(namFile, coverage, useLax) {
     }
 }
 
+function printCoverageShort(namFile, coverage, useLax, coverageThreshold) {
+    var i, l
+      , ct = coverageThreshold === undefined
+                                        ? 1
+                                        : coverageThreshold
+      , result = []
+      , item
+      ;
+
+    for(i=0,l=coverage.length;i<l;i++) {
+        if(coverage[i][1] < ct)
+            continue;
+        if(coverage[i][1] !== 1)
+            item = [coverage[i][0],' (', coverage[i][1]*100, '%)'].join('');
+        else
+            item = coverage[i][0];
+        result.push(item);
+    }
+    if(result.length)
+        console.log(namFile +':', result.join(', '));
+}
+
 function languageCoveragePerNamFile(namDir) {
     var namFiles = getNamFiles(namDir)
       , useLax = true
@@ -270,7 +305,7 @@ function languageCoveragePerNamFile(namDir) {
 
 function _languageCoverageforNamFile(namFile, useLax) {
     var charset =  namFile2charSet(namFile, true)
-      , coverage = FontsData.getLanguageCoverageForCharSet(charset, useLax)
+      , coverage = FontsData.getLanguageCoverageForCharSet(languageCharSets, charset, useLax)
       ;
     printCoverage(namFile, coverage, useLax);
 }
@@ -307,7 +342,7 @@ _p._loadIncludes = function(baseDir, files) {
     var includes = new Set(), result = [], include, i, l;
     for(i=0,l=files.length;i<l;i++) {
         try {
-            include = this._parseNam([baseDir,files[i]].join('/'));
+            include = this._parseNam([baseDir, files[i]].join('/'));
         }
         catch (err) {
             if(!(err instanceof RecursionError))
@@ -333,14 +368,37 @@ _p.__parseNam = function (fileName) {
       , includes = this._loadIncludes(dirname, data.header.includes)
       , ownCharset = new Set(data.map(item=>item[0]))
       , charset = new Set()
+      , name, nameParts
       ;
     // the union of each included charset and this charset
     includes.concat({charset:ownCharset})
             .forEach(item => item.charset
                                  // add all chars to charset
                                  .forEach(Set.prototype.add, charset));
+
+    // The name could be defined in the header as well.
+    // GF-latin-plus_unique-glyphs.nam
+    // GF-latin-pro_unique-glyphs.nam
+    // GF-latin-pro_optional-glyphs.nam
+    // latin_unique-glyphs.nam
+    // latin-ext_unique-glyphs.nam
+    nameParts = path.basename(fileName).split('.', 1)[0].split('_');
+    name = nameParts[0].split('-')
+                .filter(token => token !== 'GF')
+                .map(token => token === 'ext' ? 'Extended' : (token[0].toUpperCase() + token.slice(1)))
+                ;
+    if(nameParts[1].includes('optional'))
+       name.push('Optional');
+    // Latin Plus
+    // Latin Pro
+    // Latin Pro Optional
+    // Latin
+    // Latin Extended
+    name = name.join(' ');
+
     return {
         fileName: fileName
+      , name: name
       , ownCharset: ownCharset
       , includes: includes
       , languageSupport: null // placeholder
@@ -362,9 +420,15 @@ _p._parseNam = function(namFile) {
     return result;
 };
 
+_p.getNamelist = function(namFile, ensureLanguageSupport) {
+    if(ensureLanguageSupport)
+        this.getLanguageSupport(namFile);
+    return this._parseNam(namFile);
+};
+
 _p.getLanguageSupport = function(namFile) {
     var item = this._parseNam(namFile)
-      , coverage = FontsData.getLanguageCoverageForCharSet(item.charset, this.useLax)
+      , coverage = FontsData.getLanguageCoverageForCharSet(languageCharSets, item.charset, this.useLax)
       , ownCoverage = []
       , ownCoveredLanguages = new Set()
       , coveredLanguages = new Set()
@@ -408,14 +472,109 @@ function fancyLanguageCoveragePerNamFile(namDir) {
       , languageCoverage = new LanguageCoverage(useLax)
       , namFiles = getNamFiles(namDir)
       , i, l, coverage
+      , args = Array.from(arguments)
       ;
     for(i=0,l=namFiles.length;i<l;i++) {
+        coverage = languageCoverage.getLanguageSupport(namFiles[i]).ownCoverage;
+        if(args.includes('--short')) {
+            printCoverageShort(namFiles[i], coverage, useLax, 0.9);
+            continue;
+        }
         if(i!==0)
             console.log('======================');
-        coverage = languageCoverage.getLanguageSupport(namFiles[i]).ownCoverage;
         printCoverage(namFiles[i], coverage, useLax);
     }
 }
+
+function glyphSetInfo(namDir) {
+    // FIXME: use false here and then useLax when matching fonts to char sets
+    // of course, after the glyph sets have been updated.
+    var useLax = true
+      , languageCoverage = new LanguageCoverage(useLax)
+      , namFiles = getNamFiles(namDir)
+      , i, l
+      // , args = Array.from(arguments)
+      , result = Object.create(null)
+      , namelist
+      , sortIndex = Object.create(null)
+      ;
+
+
+    namFiles.map(filenameToSortInfo)
+            .sort(sortNameLists)
+            .forEach((item, i)=> sortIndex[item.fileName] = i)
+            ;
+
+    for(i=0,l=namFiles.length;i<l;i++) {
+        namelist = languageCoverage.getNamelist(namFiles[i], true);
+        result[namelist.name] = [
+            // to match the fonts to the char sets
+            Array.from(namelist.ownCharset).sort().map(cp => String.fromCodePoint(cp)).join('')
+            // to show the supported languages
+          , namelist.languageSupport.ownCoverage.filter(item => item[1] === 1).map(item => item[0])
+           // for constant order when displaying
+          , sortIndex[namFiles[i]]
+        ];
+    }
+    console.log(JSON.stringify(result));
+}
+
+function filenameToSortInfo(fileName) {
+    // GF-latin-plus_unique-glyphs.nam
+    // GF-latin-pro_unique-glyphs.nam
+    // GF-latin-pro_optional-glyphs.nam
+    // latin_unique-glyphs.nam
+    // latin-ext_unique-glyphs.nam
+    var nameParts = path.basename(fileName).split('.', 1)[0].split('_')
+      , name = nameParts[0].split('-')
+                .filter(token => token !== 'GF')
+                .map(token => token === 'ext' ? 'Extended' : token)
+                ;
+    if(nameParts[1].includes('optional'))
+       name.push('Optional');
+    // Latin Plus
+    // Latin Pro
+    // Latin Pro Optional
+    // Latin
+    return {
+        lang: name[0].toLowerCase()
+      , type: (name[1] || '').toLowerCase()
+      , optional: nameParts[1].toLowerCase().includes('optional')
+      , fileName: fileName
+    };
+}
+
+function sortNameLists(a, b) {
+    var aFirst = -1
+      , bFirst = 1
+      , types = {
+            'plus': 1
+          , 'pro': 2
+          , 'expert': 3
+        }
+      ;
+    if(a.lang !== b.lang) {
+        // latin is always first, because we have everything depending on it.
+        if(a.lang === 'latin')
+            return aFirst;
+        if(b.lang === 'latin')
+            return bFirst;
+        return a.lang < b.lang ? aFirst : bFirst;
+    }
+
+    if(a.type !== b.type) {
+        if(a.type in types || b.type in types)
+            return (types[a.type] || 100) - (types[b.type] || 100);
+        return a.type < b.type ? aFirst : bFirst;
+    }
+
+    if(a.optional !== b.optional)
+        return a.optional ? bFirst : aFirst;
+
+    // it's the same!
+    return 0;
+}
+
 
 function main(command, args) {
     var func = ({
@@ -424,6 +583,7 @@ function main(command, args) {
       , languageCoverage: languageCoveragePerNamFile
       , languageCoveragePerFile: languageCoverageforNamFile
       , fancyLanguageCoverage: fancyLanguageCoveragePerNamFile
+      , glyphSetInfo: glyphSetInfo
     })[command];
     if(!func)
         throw new Error('Subcommand "'+command+'" not found.');
