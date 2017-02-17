@@ -3,6 +3,8 @@ define([
   , 'specimenTools/initDocumentWidgets'
   , 'specimenTools/services/PubSub'
   , 'specimenTools/services/FontsData'
+  , '!require/text!specimenTools/services/languageCharSets.json'
+
   , 'specimenTools/services/WebfontProvider'
   , 'specimenTools/widgets/GlyphTables'
   , 'specimenTools/widgets/FamilyChooser'
@@ -14,6 +16,7 @@ define([
   , initDocumentWidgets
   , PubSub
   , FontsData
+  , languageCharSetsJson
   , WebFontProvider
   , GlyphTables
   , FamilyChooser
@@ -36,13 +39,13 @@ define([
         var pubsub = new PubSub()
           , factories
           , fontsData = new FontsData(pubsub, {
-              useLaxDetection: true, 
-
-              // passing in this object with a font's postscript name
-              // allows this name to be overwritten
-              overwrites: { 
-                'JosefinSans': 'Testname: Josefin Sans' 
-              } 
+                useLaxDetection: true
+              , languageCharSets: JSON.parse(languageCharSetsJson)
+                // passing in this object with a font's postscript name
+                // allows this name to be overwritten
+              , overwrites: {
+                  'JosefinSans': 'Testname: Josefin Sans'
+                }
             })
           , webFontProvider = new WebFontProvider(window, pubsub, fontsData)
           ;
