@@ -88,17 +88,22 @@ function getCharacters(languageDir){
     return [languageDir, languages[languageDir], Array.from(charSet).join('')];
 }
 
-function main() {
+function main(args) {
     //if (arguments.length === 0) {
     //    console.log('Usage: $' , path.basename(__filename));
     //    console.warn('Missing Arguments:')
     //    process.exit(1)
     //}
-    var languageDirs = fs.readdirSync(cldrMiscPath)
+
+    var includeSublocales = args.includes('--sublocales')
+      , filterLocales = includeSublocales
+                ? name => name !== 'root'
+                : name => name.indexOf('-') === -1 && name !== 'root'
+      , languageDirs = fs.readdirSync(cldrMiscPath)
                      // remove sublocales, too much resolution for our purpose
                      // also remove the 'root' locale
                      // TODO: is this certainly OK?
-                     .filter(name => name.indexOf('-') === -1 && name !== 'root')
+                     .filter(filterLocales)
 
       , result = {}
       ;
@@ -110,4 +115,4 @@ function main() {
 
 
 if (require.main === module)
-    main.apply(null, process.argv.slice(2));
+    main(process.argv.slice(2));
