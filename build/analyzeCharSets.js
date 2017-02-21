@@ -362,12 +362,20 @@ _p._loadIncludes = function(baseDir, files) {
     return result;
 };
 
+function _collectIncludes(allIncludes, item) {
+    if(allIncludes.has(item))
+        return;
+    allIncludes.add(item);
+    item.allIncludes.forEach(_collectIncludes.bind(null, allIncludes));
+}
+
 _p.__parseNam = function (fileName) {
     var data = parseNamFromFile(fileName, true)
       , dirname = path.dirname(fileName)
       , includes = this._loadIncludes(dirname, data.header.includes)
       , ownCharset = new Set(data.map(item=>item[0]))
       , charset = new Set()
+      , allIncludes = new Set()
       , name, nameParts
       ;
     // the union of each included charset and this charset
@@ -375,6 +383,7 @@ _p.__parseNam = function (fileName) {
             .forEach(item => item.charset
                                  // add all chars to charset
                                  .forEach(Set.prototype.add, charset));
+    includes.forEach(_collectIncludes.bind(null, allIncludes));
 
     // The name could be defined in the header as well.
     // GF-latin-plus_unique-glyphs.nam
@@ -401,6 +410,7 @@ _p.__parseNam = function (fileName) {
       , name: name
       , ownCharset: ownCharset
       , includes: includes
+      , allIncludes: allIncludes
       , languageSupport: null // placeholder
       , charset: charset
     };
@@ -500,7 +510,7 @@ function glyphSetInfo(namDir) {
       ;
 
 
-    namFiles.map(filenameToSortInfo)
+    namFiles.map(filenameToSortInfo.bind(null, languageCoverage))
             .sort(sortNameLists)
             .forEach((item, i)=> sortIndex[item.fileName] = i)
             ;
@@ -508,24 +518,33 @@ function glyphSetInfo(namDir) {
     for(i=0,l=namFiles.length;i<l;i++) {
         namelist = languageCoverage.getNamelist(namFiles[i], true);
         result[namelist.name] = [
-            // to match the fonts to the char sets
-            Array.from(namelist.ownCharset).sort().map(cp => String.fromCodePoint(cp)).join('')
-            // to show the supported languages
+            // [0] to match the fonts to the char sets
+            Array.from(namelist.ownCharset).sort((a,b)=>a-b).map(cp => String.fromCodePoint(cp)).join('')
+            // [1] to show the own supported languages
           , namelist.languageSupport.ownCoverage.filter(item => item[1] === 1).map(item => item[0])
-           // for constant order when displaying
+            // [2] to show the inherited supported languages
+          , Array.from(namelist.allIncludes)
+                 .sort((a,b)=>sortIndex[a.fileName] - sortIndex[b.fileName])
+                 .map(item=>item.name)
+           // [length-1] for constant order when displaying
           , sortIndex[namFiles[i]]
         ];
     }
-    console.log(JSON.stringify(result));
+
+    console.log(JSON.stringify(result));//,  null, 4));
 }
 
-function filenameToSortInfo(fileName) {
-    // GF-latin-plus_unique-glyphs.nam
-    // GF-latin-pro_unique-glyphs.nam
-    // GF-latin-pro_optional-glyphs.nam
-    // latin_unique-glyphs.nam
-    // latin-ext_unique-glyphs.nam
-    var nameParts = path.basename(fileName).split('.', 1)[0].split('_')
+function filenameToSortInfo(languageCoverage, fileName) {
+    // this could be a method of the class of languageCoverage
+
+    // fileName:
+    //       GF-latin-plus_unique-glyphs.nam
+    //       GF-latin-pro_unique-glyphs.nam
+    //       GF-latin-pro_optional-glyphs.nam
+    //       latin_unique-glyphs.nam
+    //       latin-ext_unique-glyphs.nam
+    var namelist = languageCoverage.getNamelist(fileName)
+      , nameParts = path.basename(fileName).split('.', 1)[0].split('_')
       , name = nameParts[0].split('-')
                 .filter(token => token !== 'GF')
                 .map(token => token === 'ext' ? 'Extended' : token)
@@ -536,13 +555,16 @@ function filenameToSortInfo(fileName) {
     // Latin Pro
     // Latin Pro Optional
     // Latin
+
     return {
         lang: name[0].toLowerCase()
       , type: (name[1] || '').toLowerCase()
       , optional: nameParts[1].toLowerCase().includes('optional')
       , fileName: fileName
+      , dependencies: namelist.allIncludes.size
     };
 }
+
 
 function sortNameLists(a, b) {
     var aFirst = -1
@@ -562,6 +584,12 @@ function sortNameLists(a, b) {
         return a.lang < b.lang ? aFirst : bFirst;
     }
 
+    // to make this useful we have to include into optional glyph sets
+    // as well. otherwise, they are sorted higher than their unique counterparts
+    // (which they should include)
+    if(a.dependencies !== b.dependencies)
+        return a.dependencies - b.dependencies;
+
     if(a.type !== b.type) {
         if(a.type in types || b.type in types)
             return (types[a.type] || 100) - (types[b.type] || 100);
@@ -574,7 +602,6 @@ function sortNameLists(a, b) {
     // it's the same!
     return 0;
 }
-
 
 function main(command, args) {
     var func = ({
