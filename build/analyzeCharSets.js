@@ -1,5 +1,13 @@
 #! /usr/bin/env node
 
+/*
+
+There's one main use for this script currently:
+
+specimenTools/build$ ./analyzeCharSets.js glyphSetInfo googleFontsTools/encodings/ --sublocales > ../lib/services/googleFontsCharSetsWithSublocales.json
+specimenTools/build$ ./analyzeCharSets.js glyphSetInfo googleFontsTools/encodings/ > ../lib/services/googleFontsCharSets.json
+*/
+
 "use strict";
 // jshint esnext:true
 
@@ -18,83 +26,21 @@ requirejs.config({
   , paths: {specimenTools: '.'}
 });
 requirejs.config(requirejs('setup'));
-var FontsData = requirejs('specimenTools/services/FontsData');
-
-var languageCharSetsJson =  requirejs('!require/text!../build/languageCharSets_with_locales.json')
-  , languageCharSets = JSON.parse(languageCharSetsJson)
+var FontsData = requirejs('specimenTools/services/FontsData')
+  , languageCharsetsAdresses = {
+        standard: '!require/text!specimenTools/services/languageCharSets.json'
+      , sublocales: '!require/text!specimenTools/services/languageCharSetsWithSublocales.json'
+    }
+  , _languageCharsetsData = {}
   ;
 
-function getLangData(languageCharset, googleCharsets, alphabetKey){
-    var result = {
-            charsetNames: null
-          , notFoundChars: null
-        }
-      , k, i, l
-      , charset
-      , charsetNames = new Set()
-      , languageChars = new Set(languageCharset.split(''))
-      , notFoundChars = new Set()
-      ;
-    for(k in googleCharsets) {
-        charset = googleCharsets[k][alphabetKey]
-                + googleCharsets[k].symbols
-                + googleCharsets[k].numerals
-                ;
-        charset = charset.replace('\n', '').replace(' ', '');
-
-
-
-        for(i=0,l=charset.length;i<l;i++)
-            if(languageChars.has(charset[i]))
-                charsetNames.add(k);
-            else
-                notFoundChars.add(charset[i]);
-    }
-    result.charsetNames = Array.from(charsetNames);
-    result.notFoundChars = Array.from(notFoundChars).join('');
+// key = 'standard' | 'sublocales'
+function getLanguageCharSets(key) {
+    var result = _languageCharsetsData[key];
+    if(!result)
+        _languageCharsetsData[key] = result = JSON.parse(
+                                requirejs(languageCharsetsAdresses[key]));
     return result;
-}
-
-function wrongLanguageInfo(languagesCharsetsFile, googleCharsetsFile) {
-    var languagesCharsets = JSON.parse(fs.readFileSync(languagesCharsetsFile))
-      , googleCharsets = JSON.parse(fs.readFileSync(googleCharsetsFile))
-      , k, data
-      , langData = Object.create(null)
-      , langDataMinimal = Object.create(null)
-      ;
-    // "Thai": {
-    //     "alphabet": "ก ข ฃ ค ฅ ฆ ง จ ฉ ช ซ ฌ ญ ฎ ฏ ฐ ฑ ฒ ณ ด ต ถ ท ธ น บ ป ผ ฝ พ ฟ ภ ม  ย ร ล ว ศ ษ ส ห ฬ อ ฮ ะ ั ็ า ิ ่ ํ ุ ู เ ใ ไ โ ฤ ฤๅ ฦ ฦๅ ่  ้  ๊  ๋",
-    //     "minimalSet": "ก ข ค ฆ ง จ ฉ ช ซ ฌ ญ ฎ ฏ ฐ ฑ ฒ ณ ด ต ถ ท ธ น บ ป ผ ฝ พ ฟ ภ ม  ย ร ล ว ศ ษ ส ห ฬ อ ฮ ะ า เ ใ ไ โ ฤ ฤๅ",
-    //     "numerals": "๐ ๑ ๒ ๓ ๔ ๕ ๖ ๗ ๘ ๙",
-    //     "symbols": "ๆ ฯ ฯลฯ ๏ ๚ ๛  ┼  \\"
-    //
-
-
-    // the aim is to have:
-    //      languageName => {
-    //          charsetNames: []
-    //        , notFoundChars: []
-    //      }
-    //
-    // and eventually
-    //      charsetName => {
-    //          supportedLanguages: []
-    //      }
-
-    for(k in languagesCharsets) {
-        data = getLangData(languagesCharsets[k], googleCharsets, 'alphabet');
-        //if(!data.notFoundChars.length)
-            langData[k] = data;
-        data = getLangData(languagesCharsets[k], googleCharsets, 'minimalSet');
-        //if(!data.notFoundChars.length)
-            langDataMinimal[k] = data;
-    }
-    // console.log(JSON.stringify({
-    //     langData: langData
-    //   , langDataMinimal: langDataMinimal
-    // }, null, 4));
-    console.log(JSON.stringify(langData, null, 4));
-
 }
 
 function parseNamHeader(lines) {
@@ -186,42 +132,6 @@ function parseNamFromFile(namFile, returnCodePoints) {
     return parseNam(fs.readFileSync(namFile, {encoding: 'utf8'}), returnCodePoints);
 }
 
-function namFile2charSet(namFile, returnCodePoints) {
-    return new Set(parseNamFromFile(namFile, returnCodePoints).map(item=>item[0]));
-}
-
-function languageCoveredByCharset(languageCharset, charset, collectMissing) {
-    var i, l, missing = collectMissing ? [] : null;
-    for(i=0,l=languageCharset.length;i<l;i++) {
-        if(charset.has(languageCharset[i]))
-            continue;
-        if(!collectMissing)
-            return [false, missing];
-        missing.push(languageCharset[i]);
-    }
-    return [collectMissing
-                    ? (missing.length === 0)
-                    : true
-            , missing
-            ];
-}
-
-function languagesCoveredByCharset(languagesCharsets, charset) {
-    var language, coveredLanguages = [], r;
-    for (language in languagesCharsets) {
-        if(!(r = languageCoveredByCharset(languagesCharsets[language], charset, true))[0])
-            continue;
-        coveredLanguages.push(language);
-    }
-    coveredLanguages.sort();
-    return coveredLanguages;
-}
-
-function getLanguagesCharsets(languagesCharsetsFile) {
-    return JSON.parse(fs.readFileSync(languagesCharsetsFile));
-}
-
-
 function getNamFiles(dir) {
     if(!fs.lstatSync(dir).isDirectory())
         // don't use this shell injection with input that is not a dir name
@@ -291,32 +201,9 @@ function printCoverageShort(namFile, coverage, useLax, coverageThreshold) {
         console.log(namFile +':', result.join(', '));
 }
 
-function languageCoveragePerNamFile(namDir) {
-    var namFiles = getNamFiles(namDir)
-      , useLax = true
-      , i, l
-      ;
-    for(i=0,l=namFiles.length;i<l;i++) {
-        if(i!==0)
-            console.log('======================');
-        _languageCoverageforNamFile(namFiles[i], useLax);
-    }
-}
-
-function _languageCoverageforNamFile(namFile, useLax) {
-    var charset =  namFile2charSet(namFile, true)
-      , coverage = FontsData.getLanguageCoverageForCharSet(languageCharSets, charset, useLax)
-      ;
-    printCoverage(namFile, coverage, useLax);
-}
-
-function languageCoverageforNamFile(namFile) {
-    var useLax = true;
-    _languageCoverageforNamFile(namFile, useLax);
-}
-
-function LanguageCoverage(useLax) {
+function LanguageCoverage(languageCharSets, useLax) {
     this._namFiles = Object.create(null);
+    this._languageCharSets = languageCharSets;
     this._includesRecursionDetection = new Set();
     Object.defineProperty(this, 'useLax', {
         value: !!useLax
@@ -369,6 +256,33 @@ function _collectIncludes(allIncludes, item) {
     item.allIncludes.forEach(_collectIncludes.bind(null, allIncludes));
 }
 
+function _nameFromPath(filePath) {
+    // path:
+    //       some/path/GF-latin-plus_unique-glyphs.nam
+    //       some/path/GF-latin-pro_unique-glyphs.nam
+    //       some/path/GF-latin-pro_optional-glyphs.nam
+    //       some/path/latin_unique-glyphs.nam
+    //       some/path/latin-ext_unique-glyphs.nam
+    var nameParts = path.basename(filePath).split('.', 1)[0].split('_')
+      , name = nameParts[0].split('-')
+                .filter(token => token !== 'GF')
+                .map(token => token === 'ext'
+                        ? 'Extended'
+                        : (token[0].toUpperCase() + token.slice(1)))
+      , optional = nameParts[1] && nameParts[1].includes('optional')
+    ;
+    if(optional) {
+       name.push('Optional');
+       name.optional = true;
+    }
+    // ['Latin', 'Plus']
+    // ['Latin', 'Pro']
+    // ['Latin', 'Pro', 'Optional']
+    // ['Latin']
+    // ['Latin', 'Plus']
+    return name;
+}
+
 _p.__parseNam = function (fileName) {
     var data = parseNamFromFile(fileName, true)
       , dirname = path.dirname(fileName)
@@ -376,7 +290,7 @@ _p.__parseNam = function (fileName) {
       , ownCharset = new Set(data.map(item=>item[0]))
       , charset = new Set()
       , allIncludes = new Set()
-      , name, nameParts
+      , name = _nameFromPath(fileName).join(' ')
       ;
     // the union of each included charset and this charset
     includes.concat({charset:ownCharset})
@@ -384,26 +298,6 @@ _p.__parseNam = function (fileName) {
                                  // add all chars to charset
                                  .forEach(Set.prototype.add, charset));
     includes.forEach(_collectIncludes.bind(null, allIncludes));
-
-    // The name could be defined in the header as well.
-    // GF-latin-plus_unique-glyphs.nam
-    // GF-latin-pro_unique-glyphs.nam
-    // GF-latin-pro_optional-glyphs.nam
-    // latin_unique-glyphs.nam
-    // latin-ext_unique-glyphs.nam
-    nameParts = path.basename(fileName).split('.', 1)[0].split('_');
-    name = nameParts[0].split('-')
-                .filter(token => token !== 'GF')
-                .map(token => token === 'ext' ? 'Extended' : (token[0].toUpperCase() + token.slice(1)))
-                ;
-    if(nameParts[1].includes('optional'))
-       name.push('Optional');
-    // Latin Plus
-    // Latin Pro
-    // Latin Pro Optional
-    // Latin
-    // Latin Extended
-    name = name.join(' ');
 
     return {
         fileName: fileName
@@ -438,7 +332,7 @@ _p.getNamelist = function(namFile, ensureLanguageSupport) {
 
 _p.getLanguageSupport = function(namFile) {
     var item = this._parseNam(namFile)
-      , coverage = FontsData.getLanguageCoverageForCharSet(languageCharSets, item.charset, this.useLax)
+      , coverage = FontsData.getLanguageCoverageForCharSet(this._languageCharSets, item.charset, this.useLax)
       , ownCoverage = []
       , ownCoveredLanguages = new Set()
       , coveredLanguages = new Set()
@@ -477,12 +371,14 @@ _p.getLanguageSupport = function(namFile) {
     return item.languageSupport;
 };
 
-function fancyLanguageCoveragePerNamFile(namDir) {
+function languageCoveragePerNamFile(namDir) {
     var useLax = true
-      , languageCoverage = new LanguageCoverage(useLax)
+      , args = Array.from(arguments)
+      , sublocales = args.includes('--sublocales') ? 'sublocales' : 'standard'
+      , languageCharSets = getLanguageCharSets(sublocales)
+      , languageCoverage = new LanguageCoverage(languageCharSets, useLax)
       , namFiles = getNamFiles(namDir)
       , i, l, coverage
-      , args = Array.from(arguments)
       ;
     for(i=0,l=namFiles.length;i<l;i++) {
         coverage = languageCoverage.getLanguageSupport(namFiles[i]).ownCoverage;
@@ -500,7 +396,10 @@ function glyphSetInfo(namDir) {
     // FIXME: use false here and then useLax when matching fonts to char sets
     // of course, after the glyph sets have been updated.
     var useLax = true
-      , languageCoverage = new LanguageCoverage(useLax)
+      , args = Array.from(arguments)
+      , sublocales = args.includes('--sublocales') ? 'sublocales' : 'standard'
+      , languageCharSets = getLanguageCharSets(sublocales)
+      , languageCoverage = new LanguageCoverage(languageCharSets, useLax)
       , namFiles = getNamFiles(namDir)
       , i, l
       // , args = Array.from(arguments)
@@ -536,30 +435,14 @@ function glyphSetInfo(namDir) {
 
 function filenameToSortInfo(languageCoverage, fileName) {
     // this could be a method of the class of languageCoverage
-
-    // fileName:
-    //       GF-latin-plus_unique-glyphs.nam
-    //       GF-latin-pro_unique-glyphs.nam
-    //       GF-latin-pro_optional-glyphs.nam
-    //       latin_unique-glyphs.nam
-    //       latin-ext_unique-glyphs.nam
     var namelist = languageCoverage.getNamelist(fileName)
-      , nameParts = path.basename(fileName).split('.', 1)[0].split('_')
-      , name = nameParts[0].split('-')
-                .filter(token => token !== 'GF')
-                .map(token => token === 'ext' ? 'Extended' : token)
-                ;
-    if(nameParts[1].includes('optional'))
-       name.push('Optional');
-    // Latin Plus
-    // Latin Pro
-    // Latin Pro Optional
-    // Latin
+      , name = _nameFromPath(fileName)
+      ;
 
     return {
         lang: name[0].toLowerCase()
       , type: (name[1] || '').toLowerCase()
-      , optional: nameParts[1].toLowerCase().includes('optional')
+      , optional: !!fileName.optional
       , fileName: fileName
       , dependencies: namelist.allIncludes.size
     };
@@ -605,11 +488,8 @@ function sortNameLists(a, b) {
 
 function main(command, args) {
     var func = ({
-        wrongLanguageInfo: wrongLanguageInfo
-      , listNamFiles: function(dir){ console.log(getNamFiles(dir).join('\n')); }
+        listNamFiles: function(dir){ console.log(getNamFiles(dir).join('\n')); }
       , languageCoverage: languageCoveragePerNamFile
-      , languageCoveragePerFile: languageCoverageforNamFile
-      , fancyLanguageCoverage: fancyLanguageCoveragePerNamFile
       , glyphSetInfo: glyphSetInfo
     })[command];
     if(!func)
