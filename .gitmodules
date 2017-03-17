@@ -7,3 +7,9 @@
 [submodule "build/googleFontsTools"]
 	path = build/googleFontsTools
 	url = git@github.com:graphicore/googleFontsTools.git
+[submodule "build/cldr-numbers-modern"]
+	path = build/cldr-numbers-modern
+	url = https://github.com/unicode-cldr/cldr-numbers-modern.git
+[submodule "build/cldr-core"]
+	path = build/cldr-core
+	url = https://github.com/unicode-cldr/cldr-core.git
