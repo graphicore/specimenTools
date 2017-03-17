@@ -1,11 +1,14 @@
 #! /usr/bin/env node
-
+/*jshint esnext:true*/
 
 var path = require('path')
  , fs = require('fs')
  , dirName = path.dirname(__filename)
  , cldrMiscPath = dirName + '/cldr-misc-modern/main'
  , charactersFile = 'characters.json'
+ , cldrNumbersPath = dirName + '/cldr-numbers-modern/main'
+ , numbersFile = 'numbers.json'
+ , numberingSystemsFile = dirName + '/cldr-core/supplemental/numberingSystems.json'
  , languagesFile = dirName + '/cldr-localenames-modern/main/en/languages.json'
  , languages = JSON.parse(fs.readFileSync(languagesFile)).main.en.localeDisplayNames.languages
  ;
@@ -49,9 +52,9 @@ function parseCharList(liststr, charSet) {
             end = range[2];
             while(current !== end) {
                 chars.push(current);
-                current = String.fromCodePoint(current.charCodeAt(current) + 1)
+                current = String.fromCodePoint(current.charCodeAt(current) + 1);
             }
-            chars.push(end)
+            chars.push(end);
             return chars;
         }
         if (item.indexOf('\\u') === 0)
@@ -66,15 +69,73 @@ function parseCharList(liststr, charSet) {
                             return prev;
                         }, charSet);
     // add uppercases!
-    for(item of Array.from(charSet))
+    for(var item of Array.from(charSet))
         charSet.add(item.toUpperCase());
     return charSet;
 }
 
-function getCharacters(languageDir){
+function _getJSONData(filename) {
+    var json = fs.readFileSync(filename);
+    return JSON.parse(json);
+}
+
+
+function getDigitsForNumberingSystem(cache, ns) {
+    var data;
+
+    data = cache['$numberingSystemsData'];
+    if(!data) {
+        data = _getJSONData(numberingSystemsFile).supplemental.numberingSystems;
+        if(!data)
+            throw new Error('Can\'t get numberingSystemsFile data');
+        cache['$numberingSystemsData'] = data;
+    }
+
+    if(!(ns in data))
+        throw new Error('Numbering-system "' + ns + '" not found');
+
+    if(data[ns]._type === 'numeric' && data[ns]._digits)
+        return data[ns]._digits;
+
+    if(data[ns]._type !== 'algorithmic')
+         throw new Error('Unknown numbering-system Type "' + data[ns]._type
+                            + '"' + 'in numbering-system "' + ns + '".');
+    return null;
+}
+
+function getDigits(cache, languageDir, charSet) {
+    var numbersFileName = [cldrNumbersPath, languageDir, numbersFile].join('/')
+      , numbersData = _getJSONData(numbersFileName)
+      , numbers = numbersData.main[languageDir].numbers
+      , numberingSystems = new Set()
+      , k, i, l, ns, digits
+      , allDigits = ''
+      , cacheKey = 'numbering-systems.' + languageDir
+      ;
+
+    numberingSystems.add(numbers.defaultNumberingSystem);
+    for(k in numbers.otherNumberingSystems)
+        numberingSystems.add(numbers.otherNumberingSystems[k]);
+    numberingSystems = Array.from(numberingSystems);
+
+    for(i=0,l=numberingSystems.length;i<l;i++) {
+        ns = numberingSystems[i];
+        digits = cache[cacheKey];
+        if(digits === undefined)
+            digits = cache[cacheKey] = getDigitsForNumberingSystem(cache, ns);
+        if(digits === null)
+            continue;
+        allDigits += digits;
+    }
+
+    for(i=0,l=allDigits.length;i<l;i++)
+        charSet.add(allDigits[i]);
+    return charSet;
+}
+
+function getCharacters(cache, languageDir){
     var chrFileName = [cldrMiscPath, languageDir, charactersFile].join('/')
-      , charactersDataJson = fs.readFileSync(chrFileName)
-      , charactersData = JSON.parse(charactersDataJson)
+      , charactersData = _getJSONData(chrFileName)
         // hmm the usage of languageDir in here could lead to problems
         // e.g. what if we have  a language-region languageDir here?
       , characters = charactersData.main[languageDir].characters
@@ -83,9 +144,10 @@ function getCharacters(languageDir){
 
     parseCharList(characters.exemplarCharacters, charSet);
     parseCharList(characters.punctuation, charSet);
+    getDigits(cache, languageDir, charSet);
     // we don't include these for language detection
     // charSet = parseCharList(characters.exemplarCharacters);
-    return [languageDir, languages[languageDir], Array.from(charSet).join('')];
+    return [languageDir, languages[languageDir], Array.from(charSet).sort().join('')];
 }
 
 function main(args) {
@@ -108,7 +170,8 @@ function main(args) {
       , result = {}
       ;
 
-    languageDirs.map(getCharacters).forEach(function(item) {
+    languageDirs.map(getCharacters.bind(null, Object.create(null)))
+                .forEach(function(item) {
                                     this[item[1]] = item[2]; }, result);
     console.log(JSON.stringify(result));
 }
