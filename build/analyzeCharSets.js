@@ -147,8 +147,12 @@ function getNamFiles(dir) {
     return r.output[1].split('\n').filter(item => item.length >= 1);
 }
 
-function printCoverage(namFile, coverage, useLax) {
-    var i, l, missing, maxShowMissing = 10;
+function printCoverage(namFile, coverage, useLax, maxShowMissing) {
+    var i, l, missing;
+    maxShowMissing = maxShowMissing === undefined
+                                        ? 10
+                                        : maxShowMissing
+                                        ;
     console.log(namFile);
     console.log('lax language detection:', useLax);
 
@@ -379,6 +383,7 @@ function languageCoveragePerNamFile(namDir) {
       , languageCoverage = new LanguageCoverage(languageCharSets, useLax)
       , namFiles = getNamFiles(namDir)
       , i, l, coverage
+      , maxShowMissing // = Infinity // to show all
       ;
     for(i=0,l=namFiles.length;i<l;i++) {
         coverage = languageCoverage.getLanguageSupport(namFiles[i]).ownCoverage;
@@ -388,7 +393,7 @@ function languageCoveragePerNamFile(namDir) {
         }
         if(i!==0)
             console.log('======================');
-        printCoverage(namFiles[i], coverage, useLax);
+        printCoverage(namFiles[i], coverage, useLax, maxShowMissing);
     }
 }
 
