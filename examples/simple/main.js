@@ -35,7 +35,15 @@ define([
         // dependant on the state of another module.
         var pubsub = new PubSub()
           , factories
-          , fontsData = new FontsData(pubsub, {useLaxDetection: true})
+          , fontsData = new FontsData(pubsub, {
+              useLaxDetection: true, 
+
+              // passing in this object with a font's postscript name
+              // allows this name to be overwritten
+              overwrites: { 
+                'JosefinSans': 'Testname: Josefin Sans' 
+              } 
+            })
           , webFontProvider = new WebFontProvider(window, pubsub, fontsData)
           ;
 
