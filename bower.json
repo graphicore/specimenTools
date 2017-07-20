@@ -19,8 +19,11 @@
   ],
   "dependencies": {
     "Atem-Pen-Case": "graphicore/Atem-Pen-Case",
-    "opentype.js": "~0.6.5",
+    "opentype.js": "^0.7.3",
     "requirejs": "~2.3.2",
     "requirejs-text": "~2.0.15"
+  },
+  "resolutions": {
+    "opentype.js": "^0.7.3"
   }
 }
