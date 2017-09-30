@@ -100,8 +100,16 @@ Update the CLDR submodules `cldr-localenames-modern` and `cldr-misc-modern`.
 $ git submodule update --recursive --remote
 ```
 
-Then run this command to recreate the `languageCharSets.json` file:
+Then run this command to recreate the `languageCharSets[WithSubloacales].json` files:
 
 ```
-$ ./build/makeChars2LanguageCoverageTable.js lib/fontData/languageCharSets.json
+$ ./build/makeChars2LanguageCoverageTable.js > lib/fontData/languageCharSets.json
+$ ./build/makeChars2LanguageCoverageTable.js --sublocales > lib/fontData/languageCharSetsWithSubloacales.json
+```
+
+And to create the `googleFontsCharSets[WithSublocales].json` files run:
+
+```
+$ ./build/analyzeCharSets.js glyphSetInfo build/googleFontsTools/encodings/GF\ Glyph\ Sets/ > lib/services/googleFontsCharSets.json
+$ ./build/analyzeCharSets.js glyphSetInfo build/googleFontsTools/encodings/GF\ Glyph\ Sets/ --sublocales > lib/services/googleFontsCharSetsWithSublocales.json
 ```
