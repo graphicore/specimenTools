@@ -32,14 +32,14 @@ function parseCharList(liststr, charSet) {
     assert(liststr[0] === '[' && liststr[liststr.length-1] === ']',
                         'CharList is expected to be enclosed in brackets.');
     function toChar(item) {
-        if(item.length === 1) return [item];
+        if(item.length === 1) return item;
         if(item[0] === '{' && item[item.length-1] === '}')
             // Cluster, these glyphs always appear together in the language,
             // we still need to have all of the chars in the font
-            return item.slice(1, -1).split('');
+            return item.slice(1, -1);
         // opening brackets etc. are escaped using two backslashes, e.g. \\[
         if (item.indexOf('\\\\') === 0)
-            return [item.slice(2)];
+            return item.slice(2);
         if(item.indexOf('-') !== -1 && item.length > 2) {
             // range
             var chars = []
@@ -58,19 +58,22 @@ function parseCharList(liststr, charSet) {
             return chars;
         }
         if (item.indexOf('\\u') === 0)
-            return  [String.fromCodePoint(parseInt(item.slice(2), 16))];
+            return String.fromCodePoint(parseInt(item.slice(2), 16));
         // hope this is legit
-        return item.split('');
+        return item;
     }
-    liststr.slice(1,-1).split(' ')
-                        .map(toChar).reduce(function(prev, value) {
-                            for(var i=0,l=value.length;i<l;i++)
-                                prev.add(value[i]);
+    liststr.slice(1,-1).split(' ').map(toChar)
+                       .reduce(function(prev, values) {
+                            for(let value of values) prev.add(value);
                             return prev;
                         }, charSet);
     // add uppercases!
-    for(var item of Array.from(charSet))
-        charSet.add(item.toUpperCase());
+    for(let item of charSet) {
+        // toUpperCase can produce multiple chars for one char, occasionally
+        let uc = item.toUpperCase()
+        for(let char of uc)
+            charSet.add(char);
+    }
     return charSet;
 }
 
@@ -173,6 +176,7 @@ function main(args) {
     languageDirs.map(getCharacters.bind(null, Object.create(null)))
                 .forEach(function(item) {
                                     this[item[1]] = item[2]; }, result);
+
     console.log(JSON.stringify(result));
 }
 
