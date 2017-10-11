@@ -6,7 +6,7 @@
 	url = git@github.com:unicode-cldr/cldr-localenames-modern.git
 [submodule "build/googleFontsTools"]
 	path = build/googleFontsTools
-	url = git@github.com:graphicore/googleFontsTools.git
+	url = git@github.com:/googlefonts/tools.git
 [submodule "build/cldr-numbers-modern"]
 	path = build/cldr-numbers-modern
 	url = https://github.com/unicode-cldr/cldr-numbers-modern.git
