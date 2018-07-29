@@ -38,10 +38,22 @@ define([
           , fontsData = new FontsData(pubsub, {
               useLaxDetection: true, 
 
-              // passing in this object with a font's postscript name
-              // allows this name to be overwritten
+              // passing in this object with overwrites per font file gets
+              // applied on top of the parsed opentype font object and overwrites
+              // only those properties defined
               overwrites: { 
-                'JosefinSans': 'Testname: Josefin Sans' 
+                '../../assets/fonts/Jura-Medium.ttf': {
+                  'names': {
+                    'postScriptName':  {
+                      'en': 'Jura overwritten'
+                    }
+                  },
+                  'tables': {
+                    'os2': {
+                      'usWeightClass': 400
+                    }
+                  }
+                }
               } 
             })
           , webFontProvider = new WebFontProvider(window, pubsub, fontsData)
