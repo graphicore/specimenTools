@@ -1,5 +1,7 @@
+/* jshint esversion:6 */
 define([
-    'specimenTools/loadFonts'
+    'specimenTools/services/LoadFiles'
+  , 'specimenTools/services/LoadFontsOpentypejs'
   , 'specimenTools/initDocumentWidgets'
   , 'specimenTools/services/PubSub'
   , 'specimenTools/services/FontsData'
@@ -10,7 +12,8 @@ define([
   , 'specimenTools/widgets/CurrentWebFont'
   , 'specimenTools/widgets/TypeTester'
 ], function(
-    loadFonts
+    LoadFiles
+  , LoadFontsOpentypejs
   , initDocumentWidgets
   , PubSub
   , FontsData
@@ -36,16 +39,23 @@ define([
         var pubsub = new PubSub()
           , factories
           , fontsData = new FontsData(pubsub, {
-              useLaxDetection: true, 
+              useLaxDetection: true,
 
               // passing in this object with a font's postscript name
               // allows this name to be overwritten
-              overwrites: { 
-                'JosefinSans': 'Testname: Josefin Sans' 
-              } 
+              overwrites: {
+                'JosefinSans': 'Testname Josefin Sans'
+              }
             })
           , webFontProvider = new WebFontProvider(window, pubsub, fontsData)
           ;
+
+        // no use for the instance so far
+        /* loadFonts = */new LoadFontsOpentypejs(pubsub, {
+              // legacy support
+              eventNamePrefix: ''
+          });
+
 
         factories = [
             // [css-class of host element, Constructor(, further Constructor arguments, ...)]
@@ -59,11 +69,25 @@ define([
 
         initDocumentWidgets(window.document, factories, pubsub);
 
+        pubsub.subscribe(PubSub.$ALL, (channel, ...args)=>console.log(`PubSub.$ALL[${channel}]`, ...args));
+
         pubsub.subscribe('allFontsLoaded', function() {
             pubsub.publish('activateFont', 0);
         });
 
-        loadFonts.fromUrl(pubsub, fontFiles);
+        /*
+        var loadedFonts = new LoadProtocolState(pubsub, {
+            loadChannel: 'loadFont'
+          , unloadChannel: 'unloadFont'
+          , replayPrepareChannel: 'prepareFont'
+          // replayLoadChannel: defaults to loadChannel
+          , replayAllLoadedChannel: 'allFontsLoaded'
+        });
+
+        // now loadedFonts can be used to initate a sub-specimen:
+        loadedFonts.publish(subPubSub);
+        */
+        LoadFiles.fromUrl(pubsub, fontFiles);
     }
 
     return main;
