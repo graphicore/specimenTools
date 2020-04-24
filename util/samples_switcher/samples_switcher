@@ -1,0 +1,82 @@
+#! /usr/bin/env python
+
+import sys
+from pathlib import Path
+from time import sleep
+from shutil import copyfile
+
+__doc__ = """
+Switch all (font-) files in target dir with all files in one of the source dirs.
+Try to infer the style name from the {FamilyName}-{StyleName}.{suffix}
+Where a source dirs name is expected to be `{FamilyName}.lower()`.
+This is like the Google Fonts naming scheme and because this is just for
+testing doesn't need more features. I.e. copy family directories from
+"google/fonts/otf/" to the "sources" directory and this script will loop
+over all source dirs and replace the contents in target dir.
+The new family name will be "SampleFamily".
+Target dir will be created if it does not exist.
+The contents of target dir will be deleted regularly!
+"""
+
+FONT_FILE_SUFFIXES = ('.ttf', '.otf', '.woff', '.woff2')
+SAMPLE_FAMILY_NAME = 'SampleFamily'
+
+def rotate(source_dir_path, target_dir_path):
+  for file_path in target_dir_path.iterdir():
+    if not file_path.is_file(): continue
+    file_path.unlink()
+
+  for file_path in source_dir_path.iterdir():
+    if not file_path.is_file(): continue
+    family_name, style, *_ = file_path.stem.split('-') + ['']
+    suffix = file_path.suffix
+    if family_name.lower() == source_dir_path.name.lower() \
+                        and suffix in FONT_FILE_SUFFIXES:
+        style = f'-{style}' if style else ''
+        base = SAMPLE_FAMILY_NAME # family_name
+        target_file_name = f'{base}{style}{suffix}'
+    else:
+        target_file_name = file_path.name
+    target_path = target_dir_path.joinpath(target_file_name)
+    print('copy' ,file_path.name, '->', target_file_name)
+    copyfile(file_path, target_path)
+
+def main(sources_dir, target_dir, seconds, force):
+    print(f'sources_dir {sources_dir}, target_dir {target_dir}, '
+          f'seconds {seconds}, force {force}')
+
+    target_dir_path = Path(target_dir)
+    target_dir_path.mkdir(parents=True, exist_ok=force)
+
+    sources_dir_path = Path(sources_dir)
+    while True:
+      for source_dir_path in sources_dir_path.iterdir():
+        if not source_dir_path.is_dir(): continue
+        print(f'rotating to {source_dir_path}')
+        rotate(source_dir_path, target_dir_path)
+        sleep(seconds)
+
+if __name__ == '__main__':
+  import argparse
+  argument_parser = argparse.ArgumentParser(
+    description='Rotate font files between'
+                ' target dir and the source directories.')
+
+  argument_parser.add_argument('sources_dir',
+    help='Sources directory name. Each directory within this will function'
+         ' as a source for the contents in target dir in rotation.')
+
+  argument_parser.add_argument('target_dir',
+    help='Target directory name, will be created. Use --force if it exist '
+         'and its contents can be overridden.')
+
+  argument_parser.add_argument('-f', '--force', action='store_true',
+    help='If target_dir exists, allow to change its contents.')
+
+  DEFAULT_SECONDS=7
+  argument_parser.add_argument('-s','--seconds', dest='seconds', type=int,
+    default=DEFAULT_SECONDS,
+    help=f'number of seconds between rotations (default: {DEFAULT_SECONDS})')
+
+  args = argument_parser.parse_args()
+  main(**vars(args))

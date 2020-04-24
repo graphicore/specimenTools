@@ -1,0 +1,29 @@
+{
+  "name": "specimen_tools_changes_server",
+  "version": "0.0.1",
+  "description": "Serve a html font specimen and observe and publish changes to the font files for that specimen.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/graphicore/specimenTools.git"
+  },
+  "keywords": [
+    "font specimen",
+    "font testing"
+  ],
+  "author": "Lasse Fister",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/graphicore/specimenTools/issues"
+  },
+  "homepage": "https://github.com/graphicore/specimenTools#readme",
+  "dependencies": {
+    "chokidar": "^3.3.1",
+    "express": "^4.17.1",
+    "open": "^7.0.3",
+    "socket.io": "^2.3.0"
+  }
+}
