@@ -68,7 +68,7 @@ function watch(dir, sio, fsState) {
     return watcher;
 }
 
-function main(clientLib, client, watchDir, port) {
+function main(clientLib, clientContent, client, watchDir, port) {
     const app = express()
         , httpServer = http.createServer(app)
         , sio = socketio(httpServer)
@@ -77,6 +77,7 @@ function main(clientLib, client, watchDir, port) {
     watch(watchDir, sio, fsState); // returns a fs.FSWatcher object
     app.use('/', express.static(client));
     app.use('/lib', express.static(clientLib));
+    app.use('/content', express.static(clientContent));
 
 
     function downloadFont(req, res, next) {
@@ -118,6 +119,7 @@ if (typeof require != 'undefined' && require.main==module) {
       , watchDir = path.resolve(process.argv[process.argv.length-1])
       , client = path.resolve(process.argv[process.argv.length-2])
       , clientLib = path.resolve(path.join(require.main.path, '../../lib'))
+      , clientContent = path.resolve(path.join(require.main.path, '../../content'))
       ;
     for(let i=0,l=process.argv.length-1;i<l;i++) {
         if(process.argv[i] === '-p' && i+1<l) {
@@ -128,9 +130,10 @@ if (typeof require != 'undefined' && require.main==module) {
         }
     }
     console.log('clientLib:', clientLib);
+    console.log('clientContent', clientContent);
     console.log('watchDir:', watchDir);
     console.log('client:', client);
-    main(clientLib, client, watchDir, port);
+    main(clientLib, clientContent, client, watchDir, port);
 }
 
 
